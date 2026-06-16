@@ -16,7 +16,21 @@ class FileInfo:
     path: str
     name: str
     extension: str
+    module_name: str
 
+ 
+def get_module_name(path: Path) -> str:
+    
+    parts = list(path.with_suffix("").parts)
+    
+    try:
+        idx = parts.index("backend")
+        parts = parts[idx:]
+    except ValueError:
+        pass
+    
+    return ".".join(parts)
+ 
 
 def scan_repo(root: str) -> list[FileInfo]:
     files = []
@@ -31,7 +45,9 @@ def scan_repo(root: str) -> list[FileInfo]:
                     path=str(path.resolve()),
                     name=path.name,
                     extension=path.suffix,
+                    module_name=get_module_name(path)
                 )
             )
 
     return files
+   

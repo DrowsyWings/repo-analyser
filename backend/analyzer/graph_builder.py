@@ -24,9 +24,9 @@ def build_module_lookup(files):
     lookup = {}
 
     for file in files:
-       path = Path(file.path)
-       lookup[path.stem] = file.path
-
+       # path = Path(file.path)
+       # lookup[path.stem] = file.path
+       lookup[file.module_name] = file.path
     return lookup
     
     
@@ -44,17 +44,15 @@ def build_edges(files):
         
         for imp in imports:
 
-            root_module = imp.split(".")[0]
-
-            if root_module not in module_lookup:
-                continue
-
-            edges.append(
-                {
-                    "source": file.path,
-                    "target": module_lookup[root_module],
-                }
-            )
+            # root_module = imp.split(".")[0]
+            # root_module = imp.split(".")[-1]
+            if imp in module_lookup:
+                edges.append(
+                    {
+                        "source": file.path,
+                        "target": module_lookup[imp],
+                    }
+                )
 
     return edges
     
@@ -62,7 +60,12 @@ def build_edges(files):
 def build_graph(repo_path):
     files = scan_repo(repo_path)
 
+    nodes = build_nodes(files)
+    edges = build_edges(files)
+
     return {
-        "nodes": build_nodes(files),
-        "edges": build_edges(files),
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "nodes": nodes,
+        "edges": edges,
     }
