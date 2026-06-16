@@ -12,8 +12,9 @@ def build_nodes(files):
     for file in files:
         nodes.append(
             {
-                "id": str(file.path),
+                "id": str(file.module_name),
                 "label": file.name,
+                "path": file.path,
                 "loc": get_loc(file.path),
             }
         )
@@ -26,7 +27,7 @@ def build_module_lookup(files):
     for file in files:
        # path = Path(file.path)
        # lookup[path.stem] = file.path
-       lookup[file.module_name] = file.path
+       lookup[file.module_name] = file
     return lookup
     
     
@@ -44,15 +45,17 @@ def build_edges(files):
         
         for imp in imports:
 
-            # root_module = imp.split(".")[0]
-            # root_module = imp.split(".")[-1]
-            if imp in module_lookup:
-                edges.append(
-                    {
-                        "source": file.path,
-                        "target": module_lookup[imp],
-                    }
-                )
+            if imp not in module_lookup:
+                continue
+
+            target_file = module_lookup[imp]
+
+            edges.append(
+                {
+                    "source": file.module_name,
+                    "target": target_file.module_name,
+                }
+            )
 
     return edges
     
