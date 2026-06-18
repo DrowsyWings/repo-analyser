@@ -5,10 +5,30 @@ import api from "./services/api";
 export default function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  
-  async function loadGraph() {
-    const response = await api.get("/graph");
 
+  async function loadGraph() {
+    const response = await api.get("/graph?path=.");
+    const rfNodes = response.data.nodes.map((node, index) => ({
+      id: node.id,
+      position: {
+        x: (index % 4) * 250,
+        y: Math.floor(index / 4) * 150,
+      },
+      data: {
+        label: node.label,
+      },
+    }));
+
+    const rfEdges = response.data.edges.map((edge, index) => ({
+      id: `e-${index}`,
+      source: edge.source,
+      target: edge.target,
+    }));
+
+    setNodes(rfNodes);
+    setEdges(rfEdges);
+    console.log(rfNodes);
+    console.log(rfEdges);
     console.log(response.data);
   }
 
