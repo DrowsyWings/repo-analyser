@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import GraphView from "./components/GraphView";
 import api from "./services/api";
+import { getLayoutedElements } from "./utils/layout";
+
+function handleNodeClick(event, node) {
+  console.log(node);
+}
 
 export default function App() {
   const [nodes, setNodes] = useState([]);
@@ -25,8 +30,10 @@ export default function App() {
       target: edge.target,
     }));
 
-    setNodes(rfNodes);
-    setEdges(rfEdges);
+    const layouted = getLayoutedElements(rfNodes, rfEdges);
+
+    setNodes(layouted.nodes);
+    setEdges(layouted.edges);
     console.log(rfNodes);
     console.log(rfEdges);
     console.log(response.data);
@@ -38,7 +45,7 @@ export default function App() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      <GraphView nodes={nodes} edges={edges} />
+      <GraphView nodes={nodes} edges={edges} onNodeClick={handleNodeClick} />
     </div>
   );
 }
