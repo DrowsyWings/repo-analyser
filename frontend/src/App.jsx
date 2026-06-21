@@ -2,14 +2,22 @@ import { useEffect, useState } from "react";
 import GraphView from "./components/GraphView";
 import api from "./services/api";
 import { getLayoutedElements } from "./utils/layout";
-
-function handleNodeClick(event, node) {
-  console.log(node);
-}
+import Sidebar from "./components/Sidebar";
 
 export default function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  async function handleNodeClick(event, node) {
+    const response = await api.get("/file", {
+      params: {
+        path: node.data.path,
+      },
+    });
+
+    setSelectedFile(response.data);
+  }
 
   async function loadGraph() {
     const response = await api.get("/graph?path=.");
@@ -21,6 +29,8 @@ export default function App() {
       },
       data: {
         label: node.label,
+        path: node.path,
+        loc: node.loc,
       },
     }));
 
@@ -44,8 +54,27 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <GraphView nodes={nodes} edges={edges} onNodeClick={handleNodeClick} />
+    <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
+      <div style={{ flex: 3 }}>
+        <GraphView nodes={nodes} edges={edges} onNodeClick={handleNodeClick} />
+      </div>
+      <div
+        style={{
+          flex: 1,
+          borderLeft: "1px solid #ccc",
+          overflow: "auto",
+          padding: "1rem",
+        }}
+      >
+        <div
+          style={{
+            padding: "16px",
+            textAlign: "left",
+          }}
+        >
+          <Sidebar fileData={selectedFile} />
+        </div>
+      </div>
     </div>
   );
 }
