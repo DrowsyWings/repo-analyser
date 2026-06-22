@@ -28,9 +28,14 @@ export default function App() {
         y: Math.floor(index / 4) * 150,
       },
       data: {
-        label: node.label,
+        label: (
+          <>
+            <strong>{node.label}</strong>
+            <br />
+            <span style={{ fontSize: "11px" }}>{node.loc} LOC</span>
+          </>
+        ),
         path: node.path,
-        loc: node.loc,
       },
     }));
 
@@ -60,16 +65,27 @@ export default function App() {
       </div>
       <div
         style={{
-          flex: 1,
-          borderLeft: "1px solid #ccc",
-          overflow: "auto",
-          padding: "1rem",
+          display: "flex",
+          height: "100vh",
+          width: "100vw",
         }}
       >
         <div
           style={{
-            padding: "16px",
-            textAlign: "left",
+            flex: 1,
+          }}
+        >
+          <GraphView
+            nodes={nodes}
+            edges={edges}
+            onNodeClick={handleNodeClick}
+          />
+        </div>
+
+        <div
+          style={{
+            width: "420px",
+            borderLeft: "1px solid #444",
           }}
         >
           <Sidebar fileData={selectedFile} />
