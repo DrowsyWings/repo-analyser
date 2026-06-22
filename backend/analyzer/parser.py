@@ -1,11 +1,12 @@
 import ast
+from pathlib import Path
 
 
 def get_loc(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         return len(f.readlines())
-        
-        
+
+
 def extract_python_imports(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         tree = ast.parse(f.read())

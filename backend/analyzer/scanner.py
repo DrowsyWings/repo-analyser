@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from backend.utils.path_utils import module_name_from_path
+
 SUPPORTED_EXTENSIONS = {".py", ".js", ".ts", ".jsx", ".tsx", ".cpp", ".c", ".h", ".hpp"}
 
 IGNORED_DIRS = {
@@ -18,19 +20,6 @@ class FileInfo:
     extension: str
     module_name: str
 
- 
-def get_module_name(path: Path) -> str:
-    
-    parts = list(path.with_suffix("").parts)
-    
-    try:
-        idx = parts.index("backend")
-        parts = parts[idx:]
-    except ValueError:
-        pass
-    
-    return ".".join(parts)
- 
 
 def scan_repo(root: str) -> list[FileInfo]:
     files = []
@@ -45,9 +34,8 @@ def scan_repo(root: str) -> list[FileInfo]:
                     path=str(path.resolve()),
                     name=path.name,
                     extension=path.suffix,
-                    module_name=get_module_name(path)
+                    module_name=module_name_from_path(path),
                 )
             )
 
     return files
-   

@@ -33,6 +33,18 @@ export default function Sidebar({ fileData }) {
 
       <p>{fileData.loc}</p>
 
+      <h3>📥 Imported By</h3>
+
+      {fileData.imported_by.length === 0 ? (
+        <p>Nothing</p>
+      ) : (
+        <ul>
+          {fileData.imported_by.map((file) => (
+            <li key={file}>{file}</li>
+          ))}
+        </ul>
+      )}
+
       <h3>📦 Imports</h3>
 
       {fileData.imports.length === 0 ? (
