@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.services.file_service import get_file_details
 from backend.services.graph_service import get_graph
+from backend.services.summary_service import summarize
 
 app = FastAPI()
 
@@ -28,3 +29,8 @@ def graph(path: str):
 @app.get("/file")
 def file(path: str):
     return get_file_details(path)
+
+
+@app.get("/summary")
+def summary(path: str):
+    return summarize(path)

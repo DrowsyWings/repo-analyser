@@ -1,4 +1,4 @@
-export default function Sidebar({ fileData }) {
+export default function Sidebar({ fileData, loadingSummary, summary }) {
   if (!fileData) {
     return (
       <div style={{ padding: "20px" }}>
@@ -58,6 +58,10 @@ export default function Sidebar({ fileData }) {
       )}
 
       <hr />
+
+      <h3>🤖 AI Summary</h3>
+
+      {loadingSummary ? <p>Generating...</p> : <p>{summary}</p>}
 
       <h3>Code</h3>
 

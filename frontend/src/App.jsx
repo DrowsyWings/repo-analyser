@@ -7,16 +7,28 @@ import Sidebar from "./components/Sidebar";
 export default function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const [summary, setSummary] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+
   async function handleNodeClick(event, node) {
-    const response = await api.get("/file", {
-      params: {
-        path: node.data.path,
-      },
+    setLoadingSummary(true);
+
+    const filePromise = api.get("/file", { params: { path: node.data.path } });
+
+    const summaryPromise = api.get("/summary", {
+      params: { path: node.data.path },
     });
 
-    setSelectedFile(response.data);
+    const [file, summary] = await Promise.all([filePromise, summaryPromise]);
+
+    setSelectedFile(file.data);
+
+    setSummary(summary.data.summary);
+
+    setLoadingSummary(false);
   }
 
   async function loadGraph() {
@@ -88,7 +100,11 @@ export default function App() {
             borderLeft: "1px solid #444",
           }}
         >
-          <Sidebar fileData={selectedFile} />
+          <Sidebar
+            fileData={selectedFile}
+            loadingSummary={loadingSummary}
+            summary={summary}
+          />
         </div>
       </div>
     </div>
