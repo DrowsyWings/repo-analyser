@@ -26,15 +26,16 @@ const CustomNode = memo(({ data, selected }) => {
     <div
       className="custom-node"
       style={{
+        width: "100%",
         borderLeftColor: isHighlighted ? "#fff" : selected ? "var(--accent)" : lang.color,
         borderColor: selected ? "var(--accent)" : undefined,
         opacity: isDimmed ? 0.2 : 1,
         boxShadow: isHighlighted
-          ? `0 0 0 1px #fff, 0 0 12px ${lang.color}80`
+          ? `0 0 0 1px #fff, 0 0 16px ${lang.color}80`
           : selected
           ? "0 0 0 1px var(--accent)"
           : "none",
-        transition: "opacity 0.2s, box-shadow 0.2s",
+        transition: "opacity 0.2s, box-shadow 0.2s, transform 0.15s",
       }}
     >
       <Handle type="target" position={Position.Top} className="node-handle" />
@@ -45,7 +46,11 @@ const CustomNode = memo(({ data, selected }) => {
         </span>
         <span
           className="node-lang-badge"
-          style={{ background: lang.bg, color: lang.color, border: `1px solid ${lang.color}50` }}
+          style={{
+            background: lang.bg,
+            color: lang.color,
+            border: `1px solid ${lang.color}50`,
+          }}
         >
           {lang.label}
         </span>
