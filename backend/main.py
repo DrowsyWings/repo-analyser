@@ -3,10 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.schemas.summary import SummaryResponse
 from backend.services.file_service import get_file_details
-from backend.services.graph_service import get_graph
+from backend.services.graph_service import get_graph, get_stats
 from backend.services.summary_service import summarize
 
-app = FastAPI()
+app = FastAPI(title="RepoAnalyser API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,13 +23,18 @@ def root():
 
 
 @app.get("/graph")
-def graph(path: str):
+def graph(path: str = "."):
     return get_graph(path)
 
 
+@app.get("/stats")
+def stats(path: str = "."):
+    return get_stats(path)
+
+
 @app.get("/file")
-def file(path: str):
-    return get_file_details(path)
+def file(path: str, repo_path: str = "."):
+    return get_file_details(path, repo_path)
 
 
 @app.get("/summary", response_model=SummaryResponse)

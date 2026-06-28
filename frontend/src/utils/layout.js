@@ -1,41 +1,33 @@
 import dagre from "dagre";
 
-const dagreGraph = new dagre.graphlib.Graph();
+const NODE_WIDTH = 420;
+const NODE_HEIGHT = 110;
 
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-export function getLayoutedElements(nodes, edges) {
-  dagreGraph.setGraph({
-    rankdir: "TB",
-  });
+export function getLayoutedElements(nodes, edges, direction = "TB") {
+  const graph = new dagre.graphlib.Graph();
+  graph.setDefaultEdgeLabel(() => ({}));
+  graph.setGraph({ rankdir: direction, ranksep: 160, nodesep: 120 });
 
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, {
-      width: 180,
-      height: 50,
-    });
+    graph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
   });
 
   edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
+    graph.setEdge(edge.source, edge.target);
   });
 
-  dagre.layout(dagreGraph);
+  dagre.layout(graph);
 
   const layoutedNodes = nodes.map((node) => {
-    const pos = dagreGraph.node(node.id);
-
+    const pos = graph.node(node.id);
     return {
       ...node,
       position: {
-        x: pos.x,
-        y: pos.y,
+        x: pos.x - NODE_WIDTH / 2,
+        y: pos.y - NODE_HEIGHT / 2,
       },
     };
   });
 
-  return {
-    nodes: layoutedNodes,
-    edges,
-  };
+  return { nodes: layoutedNodes, edges };
 }
