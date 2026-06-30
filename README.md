@@ -1,6 +1,6 @@
 # RepoAnalyser
  
-A tool that scans a local Git repository, maps out how its files depend on each other, and renders the whole thing as an interactive, draggable graph — with AI-generated summaries on click.
+A tool that scans a local Git repository, maps out how its files depend on each other, and renders the whole thing as an interactive, draggable graph with AI-generated summaries on click.
  
 No more guessing where to start in an unfamiliar codebase. Point it at a folder, see the architecture.
  
@@ -28,10 +28,15 @@ No more guessing where to start in an unfamiliar codebase. Point it at a folder,
 | Layout | Dagre (auto-arranges the graph) |
  
 ---
+
+## Working Demo
+
+[Screencast_20260630_134419.webm](https://github.com/user-attachments/assets/62094cba-b64a-4146-9659-72bf4c8af647)
+
  
 ## Architecture
  
-The backend is layered — routes never touch the filesystem directly, everything goes through a service.
+The backend is layered, routes never touch the filesystem directly, everything goes through a service.
  
 ```mermaid
 flowchart TD
