@@ -135,14 +135,29 @@ export default function App() {
       }))
     );
   }
-
+  
   function handleSearchSelect(node) {
-    setSearchTerm("");
-    setSearchDropdown([]);
-    setNodes((prev) =>
-      prev.map((n) => ({ ...n, data: { ...n.data, highlighted: null } }))
-    );
-    graphViewRef.current?.focusNode(node.id);
+      setSearchTerm("");
+      setSearchDropdown([]);
+  
+      setNodes((prev) =>
+          prev.map((n) => ({
+              ...n,
+              data: {
+                  ...n.data,
+                  highlighted: null,
+              },
+          }))
+      );
+  
+      graphViewRef.current?.focusNode(node.id);
+  
+      handleNodeClick(null, {
+          id: node.id,
+          data: {
+              path: node.path,
+          },
+      });
   }
 
   function handleRepoSubmit(e) {

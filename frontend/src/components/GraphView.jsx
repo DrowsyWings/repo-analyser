@@ -35,7 +35,7 @@ const GraphViewInner = forwardRef(({ nodes, edges, onNodeClick }, ref) => {
   useEffect(() => { setEdges(edges); }, [edges]);
   useEffect(() => {
     if (nodes.length > 0) {
-      setTimeout(() => fitView({ padding: 0.15, duration: 400 }), 50);
+      setTimeout(() => fitView({  padding:0.28, duration:500, includeHiddenNodes:false, }), 50);
     }
   }, []);
 
@@ -44,9 +44,9 @@ const GraphViewInner = forwardRef(({ nodes, edges, onNodeClick }, ref) => {
       const node = getNode(nodeId);
       if (node) {
         setCenter(
-          node.position.x + 100,
-          node.position.y + 35,
-          { zoom: 1.8, duration: 700 }
+          node.position.x + 200,
+          node.position.y + 55,
+          { zoom: 1.35, duration: 600 }
         );
       }
     },
@@ -76,14 +76,26 @@ const GraphViewInner = forwardRef(({ nodes, edges, onNodeClick }, ref) => {
       nodesDraggable
       elementsSelectable
       defaultEdgeOptions={{
-        type: "smoothstep",
-        style: { stroke: "#94a3b8", strokeWidth: 1.6 },
+          type: "smoothstep",
+      
+          pathOptions: {
+              offset: 25,
+              borderRadius: 12,
+          },
+      
+          style: {
+              stroke: "#94A3B8",
+              strokeWidth: 1.6,
+          },
       }}
       fitView
     >
       <Background color="#d8e2ee" gap={26} size={1} />
       <Controls />
       <MiniMap
+        pannable
+        zoomable
+        nodeStrokeWidth={2}
         nodeColor={(n) => {
           const ext = n.data?.path ? "." + n.data.path.split(".").pop() : "";
           return LANG_COLORS[ext] || "#555";
