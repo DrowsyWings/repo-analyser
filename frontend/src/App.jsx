@@ -60,7 +60,7 @@ export default function App() {
         id: `e-${i}`,
         source: edge.source,
         target: edge.target,
-        style: { stroke: "#555", strokeWidth: 1.5 },
+        style: { stroke: "#94a3b8", strokeWidth: 1.6 },
       }));
 
       const layouted = getLayoutedElements(rfNodes, rfEdges);
@@ -232,13 +232,7 @@ export default function App() {
             📊
           </button>
 
-          <button
-            className="icon-btn"
-            onClick={() => graphViewRef.current?.exportPNG()}
-            title="Export as PNG"
-          >
-            ⬇
-          </button>
+         
         </div>
       </header>
 

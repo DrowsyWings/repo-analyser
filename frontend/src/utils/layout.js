@@ -6,7 +6,7 @@ const NODE_HEIGHT = 110;
 export function getLayoutedElements(nodes, edges, direction = "TB") {
   const graph = new dagre.graphlib.Graph();
   graph.setDefaultEdgeLabel(() => ({}));
-  graph.setGraph({ rankdir: direction, ranksep: 160, nodesep: 120 });
+  graph.setGraph({ rankdir: direction, ranksep: 90, nodesep: 50,marginx:40,marginy:40 });
 
   nodes.forEach((node) => {
     graph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });

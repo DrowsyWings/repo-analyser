@@ -77,11 +77,11 @@ const GraphViewInner = forwardRef(({ nodes, edges, onNodeClick }, ref) => {
       elementsSelectable
       defaultEdgeOptions={{
         type: "smoothstep",
-        style: { stroke: "#555", strokeWidth: 1.5 },
+        style: { stroke: "#94a3b8", strokeWidth: 1.6 },
       }}
       fitView
     >
-      <Background color="#3e3e42" gap={24} size={1} />
+      <Background color="#d8e2ee" gap={26} size={1} />
       <Controls />
       <MiniMap
         nodeColor={(n) => {
