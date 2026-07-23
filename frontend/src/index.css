@@ -1,27 +1,26 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
-
 :root {
-  --bg-app: #F8F4EC;
-  --bg-surface: #FFFDF8;
-  --bg-card: #FFFDF8;
-  --bg-input: #F2ECE1;
-  --bg-hover: #ECE3D4;
+    --bg-app: #050505;
+    --bg-surface: #121212;
+    --bg-card: #1b1b1b;
+    --bg-input: #262626;
+    --bg-hover: #303030;
 
-  --border: #D9CDBB;
-  --border-light: #CABCA7;
+    --border: #383838;
+    --border-light: #505050;
 
-  --accent: #B45309;
-  --accent-hover: #92400E;
-  --accent-dim: rgba(180,83,9,.12);
+    --accent: #0066ff;
+    --accent-hover: #0052cc;
+    --accent-dim: rgba(0,102,255,.15);
 
-  --text-primary: #433422;
-  --text-secondary: #6B5B48;
-  --text-muted: #9B8B77;
+    --text-primary: #ffffff;
+    --text-secondary: #dadada;
+    --text-muted: #8a8a8a;
 
-  --success: #3F7D20;
-  --warning: #C17D11;
-  --error: #B91C1C;
+    --success: #00d26a;
+    --warning: #ffb703;
+    --error: #ff4d6d;
 }
 
 html,
@@ -358,7 +357,9 @@ body,
 
 .custom-node:hover {
     transform: translateY(-1px);
-    box-shadow:  0 2px 4px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.08);
+    box-shadow:
+        0 2px 4px rgba(15, 23, 42, 0.06),
+        0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .node-header {
@@ -606,7 +607,6 @@ body,
     flex-direction: column;
     gap: 1px;
     background: var(--border);
-    
 }
 
 .sidebar-heading {
@@ -788,7 +788,7 @@ body,
 }
 
 .react-flow__controls-button {
-    background:#f8fafc;
+    background: #f8fafc;
     border-right: none;
     fill: var(--text-secondary);
     width: 28px;
@@ -820,4 +820,39 @@ body,
 
 .sidebar-resize-handle:hover {
     background: var(--accent);
+}
+
+.module-filter {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+    flex-wrap: wrap;
+}
+
+.module-chip {
+    border: none;
+
+    background: #eef2f7;
+
+    color: #64748b;
+
+    border-radius: 999px;
+
+    padding: 6px 12px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    transition: 0.2s;
+}
+
+.module-chip.active {
+    background: var(--accent);
+
+    color: white;
+}
+
+.module-chip:hover {
+    transform: translateY(-1px);
 }
