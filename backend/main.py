@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.schemas.file import FileResponse
+from backend.schemas.graph import GraphResponse
 from backend.schemas.summary import SummaryResponse
 from backend.services.file_service import get_file_details
 from backend.services.graph_service import get_graph, get_stats
@@ -22,7 +24,7 @@ def root():
     return {"status": "working"}
 
 
-@app.get("/graph")
+@app.get("/graph", response_model=GraphResponse)
 def graph(path: str = "."):
     return get_graph(path)
 
@@ -32,7 +34,7 @@ def stats(path: str = "."):
     return get_stats(path)
 
 
-@app.get("/file")
+@app.get("/file", response_model=FileResponse)
 def file(path: str, repo_path: str = "."):
     return get_file_details(path, repo_path)
 

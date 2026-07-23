@@ -1,6 +1,6 @@
 from pathlib import Path
 
-CACHE_DIR = Path("backend/cache")
+CACHE_DIR = Path(__file__).resolve().parent / "cache"
 
 SUPPORTED_LANGUAGES = {
     ".py",

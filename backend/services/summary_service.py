@@ -9,7 +9,7 @@ from google import genai
 
 from backend.config import MODEL, SUMMARY_CACHE_DIR
 
-load_dotenv("backend/.env")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
