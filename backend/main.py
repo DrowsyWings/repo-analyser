@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from backend.schemas.file import FileResponse
 from backend.schemas.graph import GraphResponse
 from backend.schemas.summary import SummaryResponse
 from backend.services.file_service import get_file_details
 from backend.services.graph_service import get_graph, get_stats
+from backend.services.ingest_service import RepoDownloadError, download_github_repo
 from backend.services.summary_service import summarize
 
 app = FastAPI(title="RepoAnalyser API")
@@ -42,3 +44,12 @@ def file(path: str, repo_path: str = "."):
 @app.get("/summary", response_model=SummaryResponse)
 def summary(path: str):
     return summarize(path)
+
+
+@app.post("/analyze", response_model=AnalyzeResponse)
+def analyze(req: AnalyzeRequest):
+    try:
+        path = download_github_repo(req.repo_url)
+    except RepoDownloadError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"status": "downloaded", "path": str(path)}

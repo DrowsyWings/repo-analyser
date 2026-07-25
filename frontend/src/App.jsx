@@ -108,6 +108,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-shot initial load on mount
     loadGraph(repoPath);
   }, []);
 
@@ -168,7 +169,7 @@ export default function App() {
         params: { path: node.data.path },
       });
       setSummary(sumRes.data.summary);
-    } catch (e) {
+    } catch {
       setSummary("Failed to generate summary.");
     } finally {
       setLoadingSummary(false);
