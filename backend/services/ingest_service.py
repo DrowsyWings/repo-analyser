@@ -15,6 +15,10 @@ MAX_FILES = 10_000
 
 _CHUNK = 64 * 1024
 
+# key: "owner/repo@sha" -> extracted repo path (lets a repeat analysis of the
+# same commit skip the download entirely)
+_download_cache: dict[str, Path] = {}
+
 
 class RepoDownloadError(Exception):
     pass
@@ -36,6 +40,23 @@ def parse_github_repo(repo_url: str) -> tuple[str, str]:
     if repo.endswith(".git"):
         repo = repo[:-4]
     return owner, repo
+
+
+def _github_request(url: str, accept: str | None = None) -> urllib.request.Request:
+    headers = {"User-Agent": "repo-analyze"}
+    if accept:
+        headers["Accept"] = accept
+    return urllib.request.Request(url, headers=headers)
+
+
+def _resolve_sha(owner: str, repo: str) -> str:
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits/HEAD"
+    request = _github_request(url, accept="application/vnd.github.sha")
+    try:
+        with urllib.request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
+            return response.read().decode().strip()
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise RepoDownloadError(f"Failed to resolve {owner}/{repo}: {exc}") from exc
 
 
 def _stream_with_cap(source, dest: Path) -> None:
@@ -61,17 +82,14 @@ def _extract_with_limits(archive: Path, dest: Path) -> None:
         tar.extractall(dest, filter="data")
 
 
-def download_github_repo(repo_url: str) -> Path:
-    owner, repo = parse_github_repo(repo_url)
+def _fetch_and_extract(owner: str, repo: str) -> Path:
     tarball_url = f"https://api.github.com/repos/{owner}/{repo}/tarball"
 
     tmp_dir = Path(tempfile.mkdtemp(prefix="repo-analyze-"))
     archive = tmp_dir / "repo.tar.gz"
 
     try:
-        request = urllib.request.Request(
-            tarball_url, headers={"User-Agent": "repo-analyze"}
-        )
+        request = _github_request(tarball_url)
         try:
             with urllib.request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
                 _stream_with_cap(response, archive)
@@ -92,3 +110,21 @@ def download_github_repo(repo_url: str) -> Path:
     except Exception:
         shutil.rmtree(tmp_dir, ignore_errors=True)
         raise
+
+
+def download_github_repo(repo_url: str) -> Path:
+    owner, repo = parse_github_repo(repo_url)
+    sha = _resolve_sha(owner, repo)
+    key = f"{owner}/{repo}@{sha}"
+
+    cached = _download_cache.get(key)
+    if cached and cached.is_dir():
+        return cached
+
+    path = _fetch_and_extract(owner, repo)
+    _download_cache[key] = path
+    return path
+
+
+def clear_download_cache() -> None:
+    _download_cache.clear()

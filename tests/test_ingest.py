@@ -71,3 +71,23 @@ def test_extract_with_limits_extracts_files(tmp_path):
     dest.mkdir()
     ingest_service._extract_with_limits(archive, dest)
     assert (dest / "repo" / "a.py").read_text() == "print(1)\n"
+
+
+def test_download_reuses_cached_commit(tmp_path, monkeypatch):
+    repo_dir = tmp_path / "octocat-Hello-World-abc123"
+    repo_dir.mkdir()
+
+    ingest_service.clear_download_cache()
+    monkeypatch.setattr(ingest_service, "_resolve_sha", lambda owner, repo: "abc123")
+    ingest_service._download_cache["octocat/Hello-World@abc123"] = repo_dir
+
+    def _boom(owner, repo):
+        raise AssertionError("should not re-download a cached commit")
+
+    monkeypatch.setattr(ingest_service, "_fetch_and_extract", _boom)
+
+    result = ingest_service.download_github_repo(
+        "https://github.com/octocat/Hello-World"
+    )
+    assert result == repo_dir
+    ingest_service.clear_download_cache()
