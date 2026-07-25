@@ -52,4 +52,4 @@ def analyze(req: AnalyzeRequest):
         path = download_github_repo(req.repo_url)
     except RepoDownloadError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return {"status": "downloaded", "path": str(path)}
+    return {"path": str(path), "graph": get_graph(str(path))}
