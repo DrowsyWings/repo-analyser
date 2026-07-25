@@ -9,18 +9,20 @@ from backend.analyzer.parser import (
 from backend.analyzer.scanner import scan_repo
 
 JS_EXTENSIONS = {".js", ".jsx", ".ts", ".tsx"}
-C_EXTENSIONS  = {".c", ".cpp", ".h", ".hpp"}
+C_EXTENSIONS = {".c", ".cpp", ".h", ".hpp"}
 
 
 def build_nodes(files):
     nodes = []
     for file in files:
-        nodes.append({
-            "id":    str(file.module_name),
-            "label": file.name,
-            "path":  file.path,
-            "loc":   get_loc(file.path),
-        })
+        nodes.append(
+            {
+                "id": str(file.module_name),
+                "label": file.name,
+                "path": file.path,
+                "loc": get_loc(file.path),
+            }
+        )
     return nodes
 
 
@@ -61,7 +63,7 @@ def resolve_c_import(from_path: str, include_path: str, path_lookup: dict):
 def build_edges(files):
     edges = []
     module_lookup = build_module_lookup(files)
-    path_lookup   = build_path_lookup(files)
+    path_lookup = build_path_lookup(files)
 
     for file in files:
         if file.extension == ".py":
@@ -69,10 +71,12 @@ def build_edges(files):
             for imp in imports:
                 if imp not in module_lookup:
                     continue
-                edges.append({
-                    "source": file.module_name,
-                    "target": module_lookup[imp].module_name,
-                })
+                edges.append(
+                    {
+                        "source": file.module_name,
+                        "target": module_lookup[imp].module_name,
+                    }
+                )
 
         elif file.extension in JS_EXTENSIONS:
             imports = extract_js_imports(file.path)
@@ -81,20 +85,24 @@ def build_edges(files):
                     continue  # skip external packages like react, axios
                 target = resolve_js_import(file.path, imp, path_lookup)
                 if target:
-                    edges.append({
-                        "source": file.module_name,
-                        "target": target.module_name,
-                    })
+                    edges.append(
+                        {
+                            "source": file.module_name,
+                            "target": target.module_name,
+                        }
+                    )
 
         elif file.extension in C_EXTENSIONS:
             imports = extract_c_imports(file.path)
             for imp in imports:
                 target = resolve_c_import(file.path, imp, path_lookup)
                 if target:
-                    edges.append({
-                        "source": file.module_name,
-                        "target": target.module_name,
-                    })
+                    edges.append(
+                        {
+                            "source": file.module_name,
+                            "target": target.module_name,
+                        }
+                    )
 
     return edges
 
@@ -107,8 +115,8 @@ def build_graph(repo_path):
     return {
         "node_count": len(nodes),
         "edge_count": len(edges),
-        "nodes":      nodes,
-        "edges":      edges,
+        "nodes": nodes,
+        "edges": edges,
     }
 
 

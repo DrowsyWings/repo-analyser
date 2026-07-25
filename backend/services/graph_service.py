@@ -46,7 +46,6 @@ def get_stats(repo_path: str):
         "average_loc": average_loc,
         "languages": dict(lang_counts),
         "largest_files": [
-            {"name": n["label"], "loc": n["loc"], "path": n["path"]}
-            for n in largest
+            {"name": n["label"], "loc": n["loc"], "path": n["path"]} for n in largest
         ],
     }
