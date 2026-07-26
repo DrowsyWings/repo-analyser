@@ -91,3 +91,27 @@ def test_download_reuses_cached_commit(tmp_path, monkeypatch):
     )
     assert result == repo_dir
     ingest_service.clear_download_cache()
+
+
+def test_iter_download_steps_emits_progress(tmp_path, monkeypatch):
+    repo_dir = tmp_path / "repo"
+    repo_dir.mkdir()
+    ingest_service.clear_download_cache()
+    monkeypatch.setattr(ingest_service, "_resolve_sha", lambda owner, repo: "sha1")
+    monkeypatch.setattr(
+        ingest_service, "_fetch_and_extract", lambda owner, repo: repo_dir
+    )
+
+    steps = ingest_service.iter_download_steps("https://github.com/octocat/Hello-World")
+    stages = []
+    path = None
+    try:
+        while True:
+            stage, _ = next(steps)
+            stages.append(stage)
+    except StopIteration as stop:
+        path = stop.value
+
+    assert stages == ["resolving", "downloading"]
+    assert path == repo_dir
+    ingest_service.clear_download_cache()

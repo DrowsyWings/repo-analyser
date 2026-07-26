@@ -112,8 +112,11 @@ def _fetch_and_extract(owner: str, repo: str) -> Path:
         raise
 
 
-def download_github_repo(repo_url: str) -> Path:
+def iter_download_steps(repo_url: str):
+    """Yield (stage, message) progress tuples; returns the extracted repo path."""
     owner, repo = parse_github_repo(repo_url)
+
+    yield ("resolving", f"Resolving latest commit for {owner}/{repo}")
     sha = _resolve_sha(owner, repo)
     key = f"{owner}/{repo}@{sha}"
 
@@ -121,9 +124,19 @@ def download_github_repo(repo_url: str) -> Path:
     if cached and cached.is_dir():
         return cached
 
+    yield ("downloading", f"Downloading {owner}/{repo}")
     path = _fetch_and_extract(owner, repo)
     _download_cache[key] = path
     return path
+
+
+def download_github_repo(repo_url: str) -> Path:
+    steps = iter_download_steps(repo_url)
+    try:
+        while True:
+            next(steps)
+    except StopIteration as stop:
+        return stop.value
 
 
 def clear_download_cache() -> None:

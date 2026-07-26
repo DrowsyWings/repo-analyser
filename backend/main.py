@@ -1,5 +1,8 @@
+import json
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from backend.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from backend.schemas.file import FileResponse
@@ -7,7 +10,11 @@ from backend.schemas.graph import GraphResponse
 from backend.schemas.summary import SummaryResponse
 from backend.services.file_service import get_file_details
 from backend.services.graph_service import get_graph, get_stats
-from backend.services.ingest_service import RepoDownloadError, download_github_repo
+from backend.services.ingest_service import (
+    RepoDownloadError,
+    download_github_repo,
+    iter_download_steps,
+)
 from backend.services.summary_service import summarize
 
 app = FastAPI(title="RepoAnalyser API")
@@ -53,3 +60,33 @@ def analyze(req: AnalyzeRequest):
     except RepoDownloadError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return {"path": str(path), "graph": get_graph(str(path))}
+
+
+def _sse(event: dict) -> str:
+    return f"data: {json.dumps(event)}\n\n"
+
+
+@app.get("/analyze/stream")
+def analyze_stream(repo_url: str):
+    def events():
+        steps = iter_download_steps(repo_url)
+        try:
+            while True:
+                try:
+                    stage, message = next(steps)
+                except StopIteration as stop:
+                    path = stop.value
+                    break
+                yield _sse({"stage": stage, "message": message})
+
+            yield _sse({"stage": "building", "message": "Building dependency graph"})
+            graph = get_graph(str(path))
+            yield _sse({"stage": "done", "path": str(path), "graph": graph})
+        except RepoDownloadError as exc:
+            yield _sse({"stage": "error", "detail": str(exc)})
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache"},
+    )
