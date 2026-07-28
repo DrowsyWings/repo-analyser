@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import GraphView from "./components/GraphView";
 import Sidebar from "./components/Sidebar";
 import StatsPanel from "./components/StatsPanel";
@@ -7,11 +7,24 @@ import { getLayoutedElements } from "./utils/layout";
 import { highlightGraph } from "./utils/graphUtils";
 import "./index.css";
 
+const STAGE_PCT = {
+  starting: 8,
+  resolving: 30,
+  downloading: 65,
+  building: 88,
+};
+
+const EXAMPLE_REPOS = [
+  { label: "pallets/flask", url: "https://github.com/pallets/flask" },
+  { label: "psf/requests", url: "https://github.com/psf/requests" },
+  { label: "expressjs/express", url: "https://github.com/expressjs/express" },
+];
+
 export default function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [repoPath, setRepoPath] = useState(".");
-  const [repoInput, setRepoInput] = useState(".");
+  const [repoInput, setRepoInput] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -22,6 +35,7 @@ export default function App() {
   const [modules, setModules] = useState([]);
   const [enabledModules, setEnabledModules] = useState(new Set());
   const [graphLoading, setGraphLoading] = useState(false);
+  const [progress, setProgress] = useState(null);
   const [error, setError] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(420);
 
@@ -106,11 +120,6 @@ export default function App() {
       setGraphLoading(false);
     }
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-shot initial load on mount
-    loadGraph(repoPath);
-  }, []);
 
   function clearGraphHighlight() {
     setNodes(rawNodesRendered.current);
@@ -254,10 +263,52 @@ export default function App() {
     });
   }
 
+  function analyzeRepo(url) {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+
+    setGraphLoading(true);
+    setError(null);
+    setProgress({ stage: "starting", message: "Starting analysis…" });
+
+    const streamUrl = `${api.defaults.baseURL}/analyze/stream?repo_url=${encodeURIComponent(
+      trimmed,
+    )}`;
+    const source = new EventSource(streamUrl);
+
+    source.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.stage === "error") {
+        source.close();
+        setGraphLoading(false);
+        setProgress(null);
+        setError(data.detail || "Failed to analyse repository.");
+        return;
+      }
+
+      if (data.stage === "done") {
+        source.close();
+        setProgress(null);
+        setRepoPath(data.path);
+        loadGraph(data.path);
+        return;
+      }
+
+      setProgress({ stage: data.stage, message: data.message });
+    };
+
+    source.onerror = () => {
+      source.close();
+      setGraphLoading(false);
+      setProgress(null);
+      setError("Lost connection to the server.");
+    };
+  }
+
   function handleRepoSubmit(e) {
     e.preventDefault();
-    setRepoPath(repoInput);
-    loadGraph(repoInput);
+    analyzeRepo(repoInput);
   }
 
   // ── Resizable sidebar ──
@@ -303,9 +354,10 @@ export default function App() {
         <form className="repo-form" onSubmit={handleRepoSubmit}>
           <input
             className="repo-input"
+            type="url"
             value={repoInput}
             onChange={(e) => setRepoInput(e.target.value)}
-            placeholder="Enter repository path…"
+            placeholder="https://github.com/owner/repo"
           />
           <button className="repo-btn" type="submit" disabled={graphLoading}>
             {graphLoading ? "Loading…" : "Analyse"}
@@ -371,10 +423,40 @@ export default function App() {
           {graphLoading && (
             <div className="loading-overlay">
               <div className="spinner" />
-              <p>Analysing repository…</p>
+              <p>{progress?.message || "Analysing repository…"}</p>
+              {progress && (
+                <div className="progress-track">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${STAGE_PCT[progress.stage] ?? 10}%` }}
+                  />
+                </div>
+              )}
             </div>
           )}
           {error && <div className="error-banner">{error}</div>}
+
+          {!graphLoading && nodes.length === 0 && (
+            <div className="empty-state">
+              <span className="empty-icon">⬡</span>
+              <h2>Analyse any public GitHub repository</h2>
+              <p>Paste a repository URL above, or try one of these:</p>
+              <div className="example-repos">
+                {EXAMPLE_REPOS.map((ex) => (
+                  <button
+                    key={ex.url}
+                    className="example-chip"
+                    onClick={() => {
+                      setRepoInput(ex.url);
+                      analyzeRepo(ex.url);
+                    }}
+                  >
+                    {ex.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <GraphView
             ref={graphViewRef}
