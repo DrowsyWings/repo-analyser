@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # The Gemini client is created at import time, so a non-empty key is
+      # required for the server to boot (fail fast if it is missing).
+      - GEMINI_API_KEY=${GEMINI_API_KEY:?set GEMINI_API_KEY in your environment}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked in at build time; must be reachable from the browser.
+        VITE_API_URL: http://localhost:8000
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+# NOTE: a vector-DB service (Chroma/Qdrant) will be added here in Phase 3,
+# when the RAG "chat with repo" feature actually needs it.
