@@ -14,3 +14,5 @@ SUMMARY_CACHE_DIR = CACHE_DIR / "summaries"
 SUMMARY_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL = "gemini-2.5-flash"
+
+EMBED_MODEL = "text-embedding-004"
