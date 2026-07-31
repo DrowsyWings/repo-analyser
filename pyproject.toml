@@ -5,6 +5,7 @@ description = "Scans a repository, maps file dependencies as an interactive grap
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "chromadb>=1.5.9",
     "fastapi>=0.138.1",
     "google-genai>=2.10.0",
     "pydantic>=2.0",

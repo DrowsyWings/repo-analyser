@@ -10,3 +10,4 @@ graph.json
 .vscode/
 
 backend/cache/summaries/
+backend/cache/chroma/
