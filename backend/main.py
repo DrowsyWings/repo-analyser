@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 from backend.schemas.analyze import AnalyzeRequest, AnalyzeResponse
+from backend.schemas.chat import ChatRequest, ChatResponse
 from backend.schemas.file import FileResponse
 from backend.schemas.graph import GraphResponse
 from backend.schemas.summary import SummaryResponse
@@ -15,6 +16,7 @@ from backend.services.ingest_service import (
     download_github_repo,
     iter_download_steps,
 )
+from backend.services.rag_service import answer_question, stream_answer
 from backend.services.summary_service import summarize
 
 app = FastAPI(title="RepoAnalyser API")
@@ -64,6 +66,27 @@ def analyze(req: AnalyzeRequest):
 
 def _sse(event: dict) -> str:
     return f"data: {json.dumps(event)}\n\n"
+
+
+@app.post("/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    return answer_question(req.repo_path, req.question)
+
+
+@app.get("/chat/stream")
+def chat_stream(repo_path: str, question: str):
+    def events():
+        try:
+            for event in stream_answer(repo_path, question):
+                yield _sse(event)
+        except Exception as exc:
+            yield _sse({"type": "error", "detail": str(exc)})
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache"},
+    )
 
 
 @app.get("/analyze/stream")
