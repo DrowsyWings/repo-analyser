@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import Chat from "./components/Chat";
 import GraphView from "./components/GraphView";
 import Sidebar from "./components/Sidebar";
 import StatsPanel from "./components/StatsPanel";
@@ -30,6 +31,7 @@ export default function App() {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDropdown, setSearchDropdown] = useState([]);
   const [modules, setModules] = useState([]);
@@ -263,6 +265,23 @@ export default function App() {
     });
   }
 
+  function focusByPath(path) {
+    const node = rawNodes.current.find((n) => n.path === path);
+    if (!node) return;
+
+    graphViewRef.current?.focusNode(node.id);
+
+    const highlighted = highlightGraph(
+      rawNodesRendered.current,
+      rawEdges.current,
+      node.id,
+    );
+    setNodes(highlighted.nodes);
+    setEdges(highlighted.edges);
+
+    handleNodeClick(null, { id: node.id, data: { path: node.path } });
+  }
+
   function analyzeRepo(url) {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -402,6 +421,14 @@ export default function App() {
           </div>
 
           <button
+            className={`icon-btn ${showChat ? "active" : ""}`}
+            onClick={() => setShowChat((v) => !v)}
+            title="Chat with repo"
+            disabled={nodes.length === 0}
+          >
+            💬
+          </button>
+          <button
             className={`icon-btn ${showStats ? "active" : ""}`}
             onClick={() => setShowStats((v) => !v)}
             title="Statistics"
@@ -468,6 +495,14 @@ export default function App() {
 
           {showStats && stats && (
             <StatsPanel stats={stats} onClose={() => setShowStats(false)} />
+          )}
+
+          {showChat && nodes.length > 0 && (
+            <Chat
+              repoPath={repoPath}
+              onCitationClick={focusByPath}
+              onClose={() => setShowChat(false)}
+            />
           )}
         </div>
 
