@@ -43,6 +43,18 @@ def test_build_index_replaces_previous(tmp_path, monkeypatch):
     assert hits[0]["metadata"]["path"] == "c.py"
 
 
+def test_get_file_chunks_filters_by_path(tmp_path, monkeypatch):
+    _use_temp_store(tmp_path, monkeypatch)
+    repo = "owner/repo@sha1"
+    vector_store.build_index(repo, _chunks(), [[1.0, 0.0], [0.0, 1.0]])
+
+    hits = vector_store.get_file_chunks(repo, ["a.py"])
+    assert len(hits) == 1
+    assert hits[0]["metadata"]["path"] == "a.py"
+
+    assert vector_store.get_file_chunks(repo, []) == []
+
+
 def test_persistence_across_clients(tmp_path, monkeypatch):
     _use_temp_store(tmp_path, monkeypatch)
     repo = "owner/repo@sha1"

@@ -78,3 +78,19 @@ def query(repo_id: str, query_embedding: list[float], k: int = 5) -> list[dict]:
     ):
         hits.append({"content": document, "metadata": metadata, "distance": distance})
     return hits
+
+
+def get_file_chunks(repo_id: str, paths: list[str]) -> list[dict]:
+    if not paths:
+        return []
+    client = _get_client()
+    try:
+        collection = client.get_collection(_collection_name(repo_id))
+    except Exception:
+        return []
+
+    result = collection.get(where={"path": {"$in": list(paths)}})
+    return [
+        {"content": document, "metadata": metadata, "distance": None}
+        for document, metadata in zip(result["documents"], result["metadatas"])
+    ]
