@@ -6,6 +6,7 @@ class GraphNode(BaseModel):
     label: str
     path: str
     loc: int
+    community: str = ""
 
 
 class GraphEdge(BaseModel):

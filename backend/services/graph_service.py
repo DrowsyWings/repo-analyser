@@ -2,14 +2,23 @@ from collections import Counter
 from pathlib import Path
 
 from backend.analyzer.graph_builder import build_graph
-from backend.analyzer.graph_metrics import find_cycles, most_central, orphan_files
+from backend.analyzer.graph_metrics import (
+    assign_communities,
+    find_cycles,
+    most_central,
+    orphan_files,
+)
 
 _graph_cache: dict = {}
 
 
 def get_graph(repo_path: str):
     if repo_path not in _graph_cache:
-        _graph_cache[repo_path] = build_graph(repo_path)
+        graph = build_graph(repo_path)
+        communities = assign_communities(graph)
+        for node in graph["nodes"]:
+            node["community"] = communities.get(node["id"], "")
+        _graph_cache[repo_path] = graph
     return _graph_cache[repo_path]
 
 

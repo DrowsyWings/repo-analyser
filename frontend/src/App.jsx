@@ -66,18 +66,7 @@ export default function App() {
       rawNodes.current = raw.nodes;
 
       const moduleNames = [
-        ...new Set(
-          raw.nodes.map((n) => {
-            const p = n.path.replace(/\\/g, "/");
-            const parts = p.split("/");
-
-            const src = parts.lastIndexOf("src");
-
-            if (src !== -1 && src + 1 < parts.length) return parts[src + 1];
-
-            return parts[parts.length - 2];
-          }),
-        ),
+        ...new Set(raw.nodes.map((n) => n.community).filter(Boolean)),
       ].sort();
 
       setModules(moduleNames);
@@ -92,6 +81,7 @@ export default function App() {
           label: node.label,
           path: node.path,
           loc: node.loc,
+          community: node.community,
           highlighted: null,
         },
       }));
@@ -135,19 +125,9 @@ export default function App() {
 
     setEnabledModules(next);
 
-    const filteredNodes = rawNodesRendered.current.filter((n) => {
-      const p = n.data.path.replace(/\\/g, "/");
-      const parts = p.split("/");
-
-      const src = parts.lastIndexOf("src");
-
-      const mod =
-        src !== -1 && src + 1 < parts.length
-          ? parts[src + 1]
-          : parts[parts.length - 2];
-
-      return next.has(mod);
-    });
+    const filteredNodes = rawNodesRendered.current.filter((n) =>
+      next.has(n.data.community),
+    );
 
     const ids = new Set(filteredNodes.map((n) => n.id));
 
@@ -494,7 +474,11 @@ export default function App() {
           />
 
           {showStats && stats && (
-            <StatsPanel stats={stats} onClose={() => setShowStats(false)} />
+            <StatsPanel
+              stats={stats}
+              onClose={() => setShowStats(false)}
+              onFileClick={focusByPath}
+            />
           )}
 
           {showChat && nodes.length > 0 && (

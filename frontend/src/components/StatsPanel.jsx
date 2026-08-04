@@ -22,9 +22,13 @@ const EXT_COLORS = {
   ".hpp": "#9560b0",
 };
 
-export default function StatsPanel({ stats, onClose }) {
+export default function StatsPanel({ stats, onClose, onFileClick }) {
   const langs = stats.languages || {};
   const maxCount = Math.max(...Object.values(langs), 1);
+
+  const central = stats.central_files || [];
+  const cycles = stats.cycles || [];
+  const orphans = stats.orphan_files || [];
 
   return (
     <div className="stats-panel">
@@ -81,6 +85,45 @@ export default function StatsPanel({ stats, onClose }) {
             <span className="lf-name">{f.name}</span>
             <span className="lf-loc">{f.loc} LOC</span>
           </div>
+        ))}
+      </div>
+
+      <div className="stats-section">
+        <div className="stats-section-title">Read First (most imported)</div>
+        {central.length === 0 && <div className="stats-empty">No dependencies found</div>}
+        {central.map((f) => (
+          <button
+            key={f.path}
+            className="insight-row"
+            onClick={() => onFileClick?.(f.path)}
+          >
+            <span className="lf-name">{f.name}</span>
+            <span className="lf-loc">{f.in_degree} imports</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="stats-section">
+        <div className="stats-section-title">Circular Dependencies</div>
+        {cycles.length === 0 && <div className="stats-empty">None detected ✓</div>}
+        {cycles.map((cycle, i) => (
+          <div key={i} className="cycle-row">
+            {[...cycle, cycle[0]].join(" → ")}
+          </div>
+        ))}
+      </div>
+
+      <div className="stats-section">
+        <div className="stats-section-title">Orphan Files</div>
+        {orphans.length === 0 && <div className="stats-empty">None</div>}
+        {orphans.map((f) => (
+          <button
+            key={f.path}
+            className="insight-row"
+            onClick={() => onFileClick?.(f.path)}
+          >
+            <span className="lf-name">{f.name}</span>
+          </button>
         ))}
       </div>
     </div>

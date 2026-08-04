@@ -1,8 +1,10 @@
+from collections import Counter
 from itertools import islice
 
 import networkx as nx
 
 MAX_CYCLES = 20
+LOUVAIN_SEED = 42
 
 
 def build_nx_graph(graph: dict) -> nx.DiGraph:
@@ -55,6 +57,36 @@ def most_central(graph: dict, top_n: int = 5) -> list[dict]:
         }
         for node_id in ordered
     ]
+
+
+def _parent_name(path: str) -> str:
+    parts = path.replace("\\", "/").split("/")
+    return parts[-2] if len(parts) >= 2 else ""
+
+
+def assign_communities(graph: dict, seed: int = LOUVAIN_SEED) -> dict[str, str]:
+    """Map each node id to a community label (Louvain clustering)."""
+    g = build_nx_graph(graph).to_undirected()
+    if g.number_of_nodes() == 0:
+        return {}
+
+    path_by_id = {n["id"]: n["path"] for n in graph["nodes"]}
+    communities = nx.community.louvain_communities(g, seed=seed)
+
+    labels: dict[str, str] = {}
+    used: Counter = Counter()
+    for index, members in enumerate(communities):
+        dirs = Counter(_parent_name(path_by_id.get(nid, "")) for nid in members)
+        representative = dirs.most_common(1)[0][0] or f"module{index + 1}"
+        used[representative] += 1
+        label = (
+            representative
+            if used[representative] == 1
+            else f"{representative} {used[representative]}"
+        )
+        for nid in members:
+            labels[nid] = label
+    return labels
 
 
 def orphan_files(graph: dict) -> list[dict]:

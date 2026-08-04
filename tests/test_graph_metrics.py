@@ -1,4 +1,5 @@
 from backend.analyzer.graph_metrics import (
+    assign_communities,
     build_nx_graph,
     find_cycles,
     most_central,
@@ -98,3 +99,30 @@ def test_orphan_files_finds_isolated_nodes():
     }
     orphans = orphan_files(graph)
     assert [o["name"] for o in orphans] == ["lonely.py"]
+
+
+def test_assign_communities_groups_connected_nodes():
+    # two disconnected clusters -> two communities
+    graph = {
+        "nodes": [
+            {"id": "x1", "label": "x1.py", "path": "pkgx/x1.py", "loc": 1},
+            {"id": "x2", "label": "x2.py", "path": "pkgx/x2.py", "loc": 1},
+            {"id": "y1", "label": "y1.py", "path": "pkgy/y1.py", "loc": 1},
+            {"id": "y2", "label": "y2.py", "path": "pkgy/y2.py", "loc": 1},
+        ],
+        "edges": [
+            {"source": "x1", "target": "x2"},
+            {"source": "y1", "target": "y2"},
+        ],
+    }
+    labels = assign_communities(graph)
+
+    assert labels["x1"] == labels["x2"]
+    assert labels["y1"] == labels["y2"]
+    assert labels["x1"] != labels["y1"]
+    # labels derive from the representative directory name
+    assert set(labels.values()) == {"pkgx", "pkgy"}
+
+
+def test_assign_communities_empty_graph():
+    assert assign_communities({"nodes": [], "edges": []}) == {}
