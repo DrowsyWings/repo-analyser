@@ -1,4 +1,9 @@
-from backend.analyzer.graph_metrics import build_nx_graph, find_cycles
+from backend.analyzer.graph_metrics import (
+    build_nx_graph,
+    find_cycles,
+    most_central,
+    orphan_files,
+)
 
 GRAPH = {
     "nodes": [
@@ -58,3 +63,38 @@ def test_find_cycles_respects_cap():
         ],
     }
     assert len(find_cycles(graph, max_cycles=1)) == 1
+
+
+def test_most_central_ranks_most_imported_first():
+    # b and c both import a -> a is the most depended-on
+    graph = {
+        "nodes": [
+            {"id": "a", "label": "a.py", "path": "a.py", "loc": 1},
+            {"id": "b", "label": "b.py", "path": "b.py", "loc": 1},
+            {"id": "c", "label": "c.py", "path": "c.py", "loc": 1},
+        ],
+        "edges": [
+            {"source": "b", "target": "a"},
+            {"source": "c", "target": "a"},
+        ],
+    }
+    central = most_central(graph, top_n=1)
+    assert central[0]["name"] == "a.py"
+    assert central[0]["in_degree"] == 2
+
+
+def test_most_central_empty_graph():
+    assert most_central({"nodes": [], "edges": []}) == []
+
+
+def test_orphan_files_finds_isolated_nodes():
+    graph = {
+        "nodes": [
+            {"id": "a", "label": "a.py", "path": "a.py", "loc": 1},
+            {"id": "b", "label": "b.py", "path": "b.py", "loc": 1},
+            {"id": "lonely", "label": "lonely.py", "path": "lonely.py", "loc": 1},
+        ],
+        "edges": [{"source": "a", "target": "b"}],
+    }
+    orphans = orphan_files(graph)
+    assert [o["name"] for o in orphans] == ["lonely.py"]

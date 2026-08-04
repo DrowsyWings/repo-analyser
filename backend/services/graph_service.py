@@ -2,7 +2,7 @@ from collections import Counter
 from pathlib import Path
 
 from backend.analyzer.graph_builder import build_graph
-from backend.analyzer.graph_metrics import find_cycles
+from backend.analyzer.graph_metrics import find_cycles, most_central, orphan_files
 
 _graph_cache: dict = {}
 
@@ -29,6 +29,8 @@ def get_stats(repo_path: str):
             "languages": {},
             "largest_files": [],
             "cycles": [],
+            "central_files": [],
+            "orphan_files": [],
         }
 
     total_loc = sum(n["loc"] for n in nodes)
@@ -51,4 +53,6 @@ def get_stats(repo_path: str):
             {"name": n["label"], "loc": n["loc"], "path": n["path"]} for n in largest
         ],
         "cycles": find_cycles(graph),
+        "central_files": most_central(graph),
+        "orphan_files": orphan_files(graph),
     }
