@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import Chat from "./components/Chat";
 import GraphView from "./components/GraphView";
+import Overview from "./components/Overview";
 import Sidebar from "./components/Sidebar";
 import StatsPanel from "./components/StatsPanel";
 import api from "./services/api";
@@ -32,6 +33,7 @@ export default function App() {
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDropdown, setSearchDropdown] = useState([]);
   const [modules, setModules] = useState([]);
@@ -401,6 +403,14 @@ export default function App() {
           </div>
 
           <button
+            className={`icon-btn ${showOverview ? "active" : ""}`}
+            onClick={() => setShowOverview((v) => !v)}
+            title="Architecture overview"
+            disabled={nodes.length === 0}
+          >
+            📄
+          </button>
+          <button
             className={`icon-btn ${showChat ? "active" : ""}`}
             onClick={() => setShowChat((v) => !v)}
             title="Chat with repo"
@@ -486,6 +496,13 @@ export default function App() {
               repoPath={repoPath}
               onCitationClick={focusByPath}
               onClose={() => setShowChat(false)}
+            />
+          )}
+
+          {showOverview && nodes.length > 0 && (
+            <Overview
+              repoPath={repoPath}
+              onClose={() => setShowOverview(false)}
             />
           )}
         </div>

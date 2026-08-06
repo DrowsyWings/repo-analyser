@@ -8,6 +8,7 @@ from backend.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from backend.schemas.chat import ChatRequest, ChatResponse
 from backend.schemas.file import FileResponse
 from backend.schemas.graph import GraphResponse
+from backend.schemas.overview import OverviewResponse
 from backend.schemas.summary import SummaryResponse
 from backend.services.file_service import get_file_details
 from backend.services.graph_service import get_graph, get_stats
@@ -16,6 +17,7 @@ from backend.services.ingest_service import (
     download_github_repo,
     iter_download_steps,
 )
+from backend.services.overview_service import generate_overview
 from backend.services.rag_service import answer_question, stream_answer
 from backend.services.summary_service import summarize
 
@@ -66,6 +68,11 @@ def analyze(req: AnalyzeRequest):
 
 def _sse(event: dict) -> str:
     return f"data: {json.dumps(event)}\n\n"
+
+
+@app.get("/overview", response_model=OverviewResponse)
+def overview(path: str = "."):
+    return generate_overview(path)
 
 
 @app.post("/chat", response_model=ChatResponse)
