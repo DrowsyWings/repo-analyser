@@ -1,0 +1,30 @@
+[
+  {
+    "question": "Where are public GitHub repositories downloaded and extracted?",
+    "expected_files": ["ingest_service.py"]
+  },
+  {
+    "question": "How are source files split into function and class level chunks?",
+    "expected_files": ["chunker.py"]
+  },
+  {
+    "question": "Where is the file dependency graph built from imports?",
+    "expected_files": ["graph_builder.py"]
+  },
+  {
+    "question": "How does the chat feature retrieve relevant code and answer questions?",
+    "expected_files": ["rag_service.py"]
+  },
+  {
+    "question": "Where are text embeddings generated with Gemini?",
+    "expected_files": ["embedding_service.py"]
+  },
+  {
+    "question": "How are circular dependencies and central files detected?",
+    "expected_files": ["graph_metrics.py"]
+  },
+  {
+    "question": "Where are chunk vectors stored and queried?",
+    "expected_files": ["vector_store.py"]
+  }
+]
