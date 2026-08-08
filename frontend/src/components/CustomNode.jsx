@@ -19,14 +19,11 @@ const CustomNode = memo(({ data, selected }) => {
   const ext = data.path ? "." + data.path.split(".").pop() : "";
   const lang = LANG_CONFIG[ext] || DEFAULT;
 
-  // const isHighlighted = data.highlighted === true;
   const state = data.state ?? "normal";
 
   const isSelected = state === "selected";
   const isNeighbor = state === "neighbor";
   const isDimmed = state === "dim";
-
-  // const isDimmed = data.highlighted === false;
 
   return (
     <div

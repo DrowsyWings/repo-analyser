@@ -427,6 +427,14 @@ export default function App() {
           </button>
           <button
             className="icon-btn"
+            onClick={() => graphViewRef.current?.exportPNG()}
+            title="Export graph as PNG"
+            disabled={nodes.length === 0}
+          >
+            🖼️
+          </button>
+          <button
+            className="icon-btn"
             onClick={clearGraphHighlight}
             title="Clear Selection"
           >

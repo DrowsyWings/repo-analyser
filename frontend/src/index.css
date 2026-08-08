@@ -21,6 +21,10 @@
     --success: #00d26a;
     --warning: #ffb703;
     --error: #ff4d6d;
+
+    --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    --header-height: 58px;
 }
 
 html,
