@@ -1,6 +1,7 @@
+import os
 from pathlib import Path
 
-CACHE_DIR = Path(__file__).resolve().parent / "cache"
+CACHE_DIR = Path(os.getenv("CACHE_DIR") or Path(__file__).resolve().parent / "cache")
 
 SUPPORTED_LANGUAGES = {
     ".py",
